@@ -338,7 +338,7 @@ func (ctx *Context) doRequest(w http.ResponseWriter, r *http.Request) (bool, err
 		//	ctx.doError("Request", ErrResponseWrite, err)
 		//}
 		//return true, err
-		r.URL, _ = url.Parse("https://api.mercadolibre.com" + r.URL.Path)
+		r.URL, _ = url.Parse("http://api.mercadolibre.com" + r.URL.Path)
 	}
 	r.RequestURI = r.URL.String()
 	if ctx.Prx.OnRequest == nil {
