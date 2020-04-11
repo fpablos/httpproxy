@@ -8,7 +8,6 @@ import (
 	"io"
 	"net"
 	"net/http"
-	"net/url"
 	"strings"
 	"sync"
 )
@@ -330,15 +329,15 @@ func (ctx *Context) doMitm() (w http.ResponseWriter, r *http.Request) {
 
 func (ctx *Context) doRequest(w http.ResponseWriter, r *http.Request) (bool, error) {
 	if !r.URL.IsAbs() {
-		//if r.Body != nil {
-		//	defer r.Body.Close()
-		//}
-		//err := ServeInMemory(w, 500, nil, []byte("This is a proxy server. Does not respond to non-proxy requests."))
-		//if err != nil && !isConnectionClosed(err) {
-		//	ctx.doError("Request", ErrResponseWrite, err)
-		//}
-		//return true, err
-		r.URL, _ = url.Parse("http://api.mercadolibre.com" + r.URL.Path)
+		if r.Body != nil {
+			defer r.Body.Close()
+		}
+		err := ServeInMemory(w, 500, nil, []byte("This is a proxy server. Does not respond to non-proxy requests."))
+		if err != nil && !isConnectionClosed(err) {
+			ctx.doError("Request", ErrResponseWrite, err)
+		}
+		return true, err
+		//r.URL, _ = url.Parse("http://api.mercadolibre.com" + r.URL.Path)
 	}
 	r.RequestURI = r.URL.String()
 	if ctx.Prx.OnRequest == nil {
