@@ -330,7 +330,7 @@ func (ctx *Context) doMitm() (w http.ResponseWriter, r *http.Request) {
 
 func (ctx *Context) doRequest(w http.ResponseWriter, r *http.Request) (bool, error) {
 	if !r.URL.IsAbs() {
-		err := ServeInMemory(w, 500, nil, []byte("This is a proxy server does not respond to non-proxy requests"))
+		err := errors.New("Does not respond to non-proxy requests. I redirect to site configured by default")
 
 		if r.Body != nil {
 			defer r.Body.Close()
@@ -342,9 +342,9 @@ func (ctx *Context) doRequest(w http.ResponseWriter, r *http.Request) (bool, err
 				target += "?" + r.URL.RawQuery
 			}
 
-			err = errors.New("Does not respond to non-proxy requests. I redirect to site configured by default")
-
 			http.Redirect(w, r, target, http.StatusTemporaryRedirect)
+		} else {
+			err = ServeInMemory(w, 500, nil, []byte("This is a proxy server does not respond to non-proxy requests"))
 		}
 
 		if err != nil && !isConnectionClosed(err) {
