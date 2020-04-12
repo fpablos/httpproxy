@@ -348,7 +348,16 @@ func (ctx *Context) doRequest(w http.ResponseWriter, r *http.Request) (bool, err
 		http.Redirect(w, r, target,
 			// see comments below and consider the codes 308, 302, or 301
 			http.StatusTemporaryRedirect)
-		return true, nil
+
+		if r.Body != nil {
+			defer r.Body.Close()
+		}
+
+		err := ServeInMemory(w, 500, nil, []byte("This is a proxy server. Does not respond to non-proxy requests."))
+		if err != nil && !isConnectionClosed(err) {
+			ctx.doError("Request", ErrResponseWrite, err)
+		}
+		return true, err
 	}
 
 	r.RequestURI = r.URL.String()
