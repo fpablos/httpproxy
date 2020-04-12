@@ -7,7 +7,6 @@ import (
 	"encoding/base64"
 	"errors"
 	"io"
-	"log"
 	"net"
 	"net/http"
 	"strings"
@@ -330,34 +329,28 @@ func (ctx *Context) doMitm() (w http.ResponseWriter, r *http.Request) {
 }
 
 func (ctx *Context) doRequest(w http.ResponseWriter, r *http.Request) (bool, error) {
-	//if !r.URL.IsAbs() {
-	//	if r.Body != nil {
-	//		defer r.Body.Close()
-	//	}
-	//	err := ServeInMemory(w, 500, nil, []byte("This is a proxy server. Does not respond to non-proxy requests."))
-	//	if err != nil && !isConnectionClosed(err) {
-	//		ctx.doError("Request", ErrResponseWrite, err)
-	//	}
-	//	return true, err
-	//}
 	if !r.URL.IsAbs() {
-		target := "https://api.mercadolibre.com" + r.URL.Path
-		if len(r.URL.RawQuery) > 0 {
-			target += "?" + r.URL.RawQuery
-		}
-		log.Printf("redirect to: %s", target)
-		http.Redirect(w, r, target,
-			// see comments below and consider the codes 308, 302, or 301
-			http.StatusTemporaryRedirect)
+		err := ServeInMemory(w, 500, nil, []byte("This is a proxy server does not respond to non-proxy requests"))
 
 		if r.Body != nil {
 			defer r.Body.Close()
 		}
 
-		err := errors.New("This is a proxy server. Does not respond to non-proxy requests.")
+		if ctx.Prx.DefaultRedirectHost != "" {
+			target := ctx.Prx.DefaultRedirectHost + r.URL.Path
+			if len(r.URL.RawQuery) > 0 {
+				target += "?" + r.URL.RawQuery
+			}
+
+			err = errors.New("Does not respond to non-proxy requests. I redirect to site configured by default")
+
+			http.Redirect(w, r, target, http.StatusTemporaryRedirect)
+		}
+
 		if err != nil && !isConnectionClosed(err) {
 			ctx.doError("Request", ErrResponseWrite, err)
 		}
+
 		return true, err
 	}
 
