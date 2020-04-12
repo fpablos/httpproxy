@@ -5,6 +5,7 @@ import (
 	"context"
 	"crypto/tls"
 	"encoding/base64"
+	"errors"
 	"io"
 	"log"
 	"net"
@@ -353,7 +354,7 @@ func (ctx *Context) doRequest(w http.ResponseWriter, r *http.Request) (bool, err
 			defer r.Body.Close()
 		}
 
-		err := ServeInMemory(w, 500, nil, []byte("This is a proxy server. Does not respond to non-proxy requests."))
+		err := errors.New("This is a proxy server. Does not respond to non-proxy requests.")
 		if err != nil && !isConnectionClosed(err) {
 			ctx.doError("Request", ErrResponseWrite, err)
 		}

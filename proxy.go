@@ -2,7 +2,6 @@ package httpproxy
 
 import (
 	"crypto/tls"
-	"log"
 	"net/http"
 	"sync/atomic"
 )
@@ -90,17 +89,17 @@ func NewProxyCert(caCert, caKey []byte) (*Proxy, error) {
 
 // ServeHTTP implements http.Handler.
 func (prx *Proxy) ServeHTTP(w http.ResponseWriter, r *http.Request) {
-	if !r.URL.IsAbs() {
-		target := "https://api.mercadolibre.com" + r.URL.Path
-		if len(r.URL.RawQuery) > 0 {
-			target += "?" + r.URL.RawQuery
-		}
-		log.Printf("redirect to: %s", target)
-		http.Redirect(w, r, target,
-			// see comments below and consider the codes 308, 302, or 301
-			http.StatusTemporaryRedirect)
-		return
-	}
+	//if !r.URL.IsAbs() {
+	//	target := "https://api.mercadolibre.com" + r.URL.Path
+	//	if len(r.URL.RawQuery) > 0 {
+	//		target += "?" + r.URL.RawQuery
+	//	}
+	//	log.Printf("redirect to: %s", target)
+	//	http.Redirect(w, r, target,
+	//		// see comments below and consider the codes 308, 302, or 301
+	//		http.StatusTemporaryRedirect)
+	//	return
+	//}
 
 	ctx := &Context{Prx: prx, SessionNo: atomic.AddInt64(&prx.SessionNo, 1)}
 
