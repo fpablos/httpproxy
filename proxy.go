@@ -115,17 +115,6 @@ func (prx *Proxy) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	}()
 
 	if ctx.doAccept(w, r) {
-		if !r.URL.IsAbs() {
-			target := "https://api.mercadolibre.com" + r.URL.Path
-			if len(r.URL.RawQuery) > 0 {
-				target += "?" + r.URL.RawQuery
-			}
-			log.Printf("redirect to: %s", target)
-			http.Redirect(w, r, target,
-				// see comments below and consider the codes 308, 302, or 301
-				http.StatusTemporaryRedirect)
-			return
-		}
 		return
 	}
 

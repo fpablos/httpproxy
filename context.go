@@ -6,6 +6,7 @@ import (
 	"crypto/tls"
 	"encoding/base64"
 	"io"
+	"log"
 	"net"
 	"net/http"
 	"strings"
@@ -328,16 +329,28 @@ func (ctx *Context) doMitm() (w http.ResponseWriter, r *http.Request) {
 }
 
 func (ctx *Context) doRequest(w http.ResponseWriter, r *http.Request) (bool, error) {
+	//if !r.URL.IsAbs() {
+	//	if r.Body != nil {
+	//		defer r.Body.Close()
+	//	}
+	//	err := ServeInMemory(w, 500, nil, []byte("This is a proxy server. Does not respond to non-proxy requests."))
+	//	if err != nil && !isConnectionClosed(err) {
+	//		ctx.doError("Request", ErrResponseWrite, err)
+	//	}
+	//	return true, err
+	//}
 	if !r.URL.IsAbs() {
-		if r.Body != nil {
-			defer r.Body.Close()
+		target := "https://api.mercadolibre.com" + r.URL.Path
+		if len(r.URL.RawQuery) > 0 {
+			target += "?" + r.URL.RawQuery
 		}
-		err := ServeInMemory(w, 500, nil, []byte("This is a proxy server. Does not respond to non-proxy requests."))
-		if err != nil && !isConnectionClosed(err) {
-			ctx.doError("Request", ErrResponseWrite, err)
-		}
-		return true, err
+		log.Printf("redirect to: %s", target)
+		http.Redirect(w, r, target,
+			// see comments below and consider the codes 308, 302, or 301
+			http.StatusTemporaryRedirect)
+		return true, nil
 	}
+
 	r.RequestURI = r.URL.String()
 	if ctx.Prx.OnRequest == nil {
 		return false, nil
