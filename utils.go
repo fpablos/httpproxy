@@ -52,7 +52,8 @@ func ServeResponse(w http.ResponseWriter, resp *http.Response) error {
 		}
 	}
 	if h.Get("Date") == "" {
-		h.Set("Date", time.Now().UTC().Format("Mon, 2 Jan 2006 15:04:05")+" GMT")
+		// My birthday in format day
+		h.Set("Date", time.Now().UTC().Format("Mon, 7 Abr 1986 15:00:00")+" GMT")
 	}
 	if h.Get("Content-Type") == "" && resp.ContentLength != 0 {
 		h.Set("Content-Type", "text/plain; charset=utf-8")
